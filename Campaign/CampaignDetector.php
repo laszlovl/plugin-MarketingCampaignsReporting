@@ -12,6 +12,8 @@ namespace Piwik\Plugins\MarketingCampaignsReporting\Campaign;
 use Piwik\Common;
 use Piwik\Container\StaticContainer;
 use Piwik\Db;
+use Piwik\Plugins\MarketingCampaignsReporting\Columns\CampaignMedium;
+use Piwik\Plugins\MarketingCampaignsReporting\Columns\CampaignSource;
 use Piwik\Plugins\MarketingCampaignsReporting\MarketingCampaignsReporting;
 use Piwik\Tracker\PageUrl;
 use Piwik\Tracker\Request;
@@ -55,6 +57,17 @@ class CampaignDetector implements CampaignDetectorInterface
                 $campaignParameters
             );
         }
+
+        // 3) Detect from google auto tagging
+        if (empty($campaignDimensions) && isset($landingUrlParsed['query'])) {
+            $value = $this->getValueFromQueryString('gclid', $landingUrlParsed['query']);
+
+            if (!empty($value)) {
+                $campaignDimensions[ (new CampaignSource())->getColumnName() ] = 'google';
+                $campaignDimensions[ (new CampaignMedium())->getColumnName() ] = 'adwords';
+            }
+        }
+
         return $campaignDimensions;
     }
 
