@@ -33,4 +33,11 @@ interface CampaignDetectorInterface
      * @return array|bool
      */
     public function detectCampaignFromVisit($visitorInfo, $campaignParameters);
+
+    /**
+     * @param $visitorInfo
+     * @param $campaignParameters
+     * @return array|bool
+     */
+    public function detectCampaignFromVisitor($visitorInfo, $campaignParameters);
 }
