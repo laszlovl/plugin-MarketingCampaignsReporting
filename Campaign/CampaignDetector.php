@@ -10,6 +10,8 @@
 namespace Piwik\Plugins\MarketingCampaignsReporting\Campaign;
 
 use Piwik\Common;
+use Piwik\Container\StaticContainer;
+use Piwik\Db;
 use Piwik\Plugins\MarketingCampaignsReporting\MarketingCampaignsReporting;
 use Piwik\Tracker\PageUrl;
 use Piwik\Tracker\Request;
@@ -17,6 +19,7 @@ use Piwik\UrlHelper;
 
 class CampaignDetector implements CampaignDetectorInterface
 {
+    private $detectedVisitorParameters = null;
 
     /**
      * @param Request $request
@@ -108,6 +111,41 @@ class CampaignDetector implements CampaignDetectorInterface
             }
         }
         return $campaignDimensions;
+    }
+
+    /**
+     * @param $visitorInfo
+     * @param $campaignParameters
+     * @return array|bool
+     */
+    public function detectCampaignFromVisitor($visitorInfo, $campaignParameters)
+    {
+        if ($this->detectedVisitorParameters === null) {
+            $campaignFields = MarketingCampaignsReporting::getAdvancedCampaignFields();
+
+            $where = [];
+            $fields = [];
+
+            foreach ($campaignFields as $field) {
+                $fields[] = $field;
+                $where[] = sprintf('%s IS NOT NULL', $field);
+            }
+            
+            $query = sprintf('SELECT %s FROM %s WHERE idvisitor = ? AND (%s) ORDER BY idvisit %s LIMIT 1',
+                implode(',', $fields),
+                Common::prefixTable('log_visit'),
+                implode(' OR ', $where),
+                StaticContainer::get('advanced_campaign_reporting.attribute_first_referrer') ? 'ASC' : 'DESC'
+            );
+
+            $bind = [
+                $visitorInfo['idvisitor']
+            ];
+
+            $this->detectedVisitorParameters = Db::fetchRow($query, $bind);
+        }
+
+        return $this->detectedVisitorParameters;
     }
 
     protected function extractQueryString($fragment)

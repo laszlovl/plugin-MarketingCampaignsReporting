@@ -44,4 +44,10 @@ return [
             MarketingCampaignsReporting::$CAMPAIGN_ID_FIELD_DEFAULT_URL_PARAMS
         ];
     }),
+    'advanced_campaign_reporting.attribute_first_referrer' => DI\factory(function (ContainerInterface $c) {
+        return $c->has('ini.MarketingCampaignsReporting.attribute_first_referrer') ?
+            boolval($c->get('ini.MarketingCampaignsReporting.attribute_first_referrer')) :
+            false
+        ;
+    }),
 ];

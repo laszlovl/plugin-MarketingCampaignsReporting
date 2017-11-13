@@ -130,6 +130,13 @@ abstract class Base extends VisitDimension
             );
         }
 
+        if (empty($campaignDimensions)) {
+            $campaignDimensions = $campaignDetector->detectCampaignFromVisitor(
+                $visitProperties,
+                $campaignParameters
+            );
+        }
+
         if (!empty($campaignDimensions) && array_key_exists($this->getColumnName(), $campaignDimensions)) {
             return substr($campaignDimensions[$this->getColumnName()], 0, $this->getColumnName() == 'campaign_id' ? 100 : 255);
         }
